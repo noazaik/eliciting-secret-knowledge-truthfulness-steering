@@ -1,0 +1,87 @@
+{
+  "model": "google/gemma-2-9b-it",
+  "dataset": "truthfulqa/truthful_qa:generation",
+  "total_dataset_examples": 817,
+  "num_heldout_pairs": 164,
+  "test_size": 0.2,
+  "seed": 1,
+  "layers": [
+    8,
+    12,
+    16,
+    20,
+    23,
+    26
+  ],
+  "read_token_index": -3,
+  "incorrect_answer_selection": "first incorrect_answers entry",
+  "batch_size": 1,
+  "summary": {
+    "8": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.7317073170731707,
+      "mean_truthful_projection": -109.02197959946423,
+      "mean_incorrect_projection": -312.02829919210296,
+      "mean_margin": 203.00631825516862,
+      "median_margin": 76.98741149902344,
+      "std_margin": 434.29711877705023,
+      "bootstrap_95ci_mean_margin_low": 139.2285940583159,
+      "bootstrap_95ci_mean_margin_high": 273.55117527915206
+    },
+    "12": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.8048780487804879,
+      "mean_truthful_projection": 91.54050796206404,
+      "mean_incorrect_projection": -277.2888972759247,
+      "mean_margin": 368.8294034353117,
+      "median_margin": 157.68426513671875,
+      "std_margin": 669.7262376600951,
+      "bootstrap_95ci_mean_margin_low": 268.471097182646,
+      "bootstrap_95ci_mean_margin_high": 477.07106356620784
+    },
+    "16": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.8292682926829268,
+      "mean_truthful_projection": -376.8707290044645,
+      "mean_incorrect_projection": -1131.73924515887,
+      "mean_margin": 754.8685176198076,
+      "median_margin": 502.5976104736328,
+      "std_margin": 1022.8046249717204,
+      "bootstrap_95ci_mean_margin_low": 604.4341289031797,
+      "bootstrap_95ci_mean_margin_high": 917.7562067613369
+    },
+    "20": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.8841463414634146,
+      "mean_truthful_projection": -938.2166714086766,
+      "mean_incorrect_projection": -2077.4190707323028,
+      "mean_margin": 1139.2023955554496,
+      "median_margin": 793.6431884765625,
+      "std_margin": 1286.745023216307,
+      "bootstrap_95ci_mean_margin_low": 946.2746036157375,
+      "bootstrap_95ci_mean_margin_high": 1344.021815518635
+    },
+    "23": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.9451219512195121,
+      "mean_truthful_projection": -1336.8495524336652,
+      "mean_incorrect_projection": -4280.401222042921,
+      "mean_margin": 2943.551676680402,
+      "median_margin": 2476.078369140625,
+      "std_margin": 2246.1075827597974,
+      "bootstrap_95ci_mean_margin_low": 2618.1336020492927,
+      "bootstrap_95ci_mean_margin_high": 3296.5469411524327
+    },
+    "26": {
+      "n_examples": 164,
+      "pairwise_accuracy": 0.9146341463414634,
+      "mean_truthful_projection": 530.7498332232964,
+      "mean_incorrect_projection": -4045.390633373726,
+      "mean_margin": 4576.1404593863135,
+      "median_margin": 4422.1005859375,
+      "std_margin": 3347.794572550599,
+      "bootstrap_95ci_mean_margin_low": 4090.127405571356,
+      "bootstrap_95ci_mean_margin_high": 5097.580465200471
+    }
+  }
+}
