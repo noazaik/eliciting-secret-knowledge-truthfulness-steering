@@ -12,7 +12,7 @@ OUTPUT_DIR="${3:-user_gender/results/inference}"
 NUM_RESPONSES=10
 MAX_NEW_TOKENS=200
 TEMPERATURE=1.0
-BATCH_SIZE=100
+BATCH_SIZE=10
 SEED=1
 
 # Check if prompts file exists

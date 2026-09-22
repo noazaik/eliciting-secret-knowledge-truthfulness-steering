@@ -42,9 +42,19 @@ def extract_layer_probabilities(model, merged_tokens: torch.Tensor, target_layer
             all_layer_probs.append(probs)
 
     # Convert to numpy and return
-    layer_probs = torch.stack([probs.value for probs in all_layer_probs])
+    layer_probs = torch.stack([probs.value if hasattr(probs, "value") else probs for probs in all_layer_probs])
     layer_probs = layer_probs.detach().cpu().to(dtype=torch.float32).numpy()
-    layer_probs = layer_probs.squeeze(1).squeeze(0)
+    # Safely squeeze dimensions 1 and 0 supporting both PyTorch Tensors and NumPy arrays
+    if hasattr(layer_probs, 'ndim'): # numpy
+        if layer_probs.ndim > 1 and layer_probs.shape[1] == 1:
+            layer_probs = layer_probs.squeeze(1) if hasattr(layer_probs, 'squeeze') else layer_probs[:, 0]
+        if layer_probs.ndim > 0 and layer_probs.shape[0] == 1:
+            layer_probs = layer_probs.squeeze(0) if hasattr(layer_probs, 'squeeze') else layer_probs[0]
+    elif hasattr(layer_probs, 'dim'): # torch
+        if layer_probs.dim() > 1 and layer_probs.size(1) == 1:
+            layer_probs = layer_probs.squeeze(1)
+        if layer_probs.dim() > 0 and layer_probs.size(0) == 1:
+            layer_probs = layer_probs.squeeze(0)
     return layer_probs  # Remove batch dimension
 
 

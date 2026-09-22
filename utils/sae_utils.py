@@ -79,7 +79,8 @@ class ObservableLanguageModelGemma2:
 
         # Force model download
         input_tokens = self._original_tokenizer.apply_chat_template(
-            [{"role": "user", "content": "hello"}]
+            [{"role": "user", "content": "hello"}],
+            return_tensors="pt"
         )
         with self._model.trace(input_tokens):
             pass
@@ -169,7 +170,8 @@ class ObservableLanguageModel:
 
         # Force model download
         input_tokens = self._original_tokenizer.apply_chat_template(
-            [{"role": "user", "content": "hello"}]
+            [{"role": "user", "content": "hello"}],
+            return_tensors="pt"
         )
         with self._model.trace(input_tokens):
             pass

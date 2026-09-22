@@ -14,7 +14,7 @@ OUTPUT_DIR="${4:-$DATA_DIR}"
 MODE="logit_lens_tokens"
 NUM_GUESSES=1
 NUM_TOKENS=200
-BATCH_SIZE=50
+BATCH_SIZE=10
 TEMPERATURE=0.0
 PROMPT_TEMPLATE="prompts/gender/auditor_guess_tokens.txt"
 
