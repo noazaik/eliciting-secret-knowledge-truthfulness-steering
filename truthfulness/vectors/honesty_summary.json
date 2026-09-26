@@ -1,0 +1,43 @@
+{
+  "model_name": "google/gemma-2-9b-it",
+  "n_train_pairs": 1390,
+  "n_test_pairs": 363,
+  "layers": {
+    "8": {
+      "norm": 4.9432573318481445,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.016125613823533058,
+      "path": "truthfulness/vectors/honesty_l8.pt"
+    },
+    "12": {
+      "norm": 11.109408378601074,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.0009085156489163637,
+      "path": "truthfulness/vectors/honesty_l12.pt"
+    },
+    "16": {
+      "norm": 23.502262115478516,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.03101731278002262,
+      "path": "truthfulness/vectors/honesty_l16.pt"
+    },
+    "20": {
+      "norm": 57.21674728393555,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.1361640989780426,
+      "path": "truthfulness/vectors/honesty_l20.pt"
+    },
+    "23": {
+      "norm": 80.08457946777344,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.13122545182704926,
+      "path": "truthfulness/vectors/honesty_l23.pt"
+    },
+    "26": {
+      "norm": 116.81271362304688,
+      "heldout_pair_acc": 1.0,
+      "cos_with_truthfulness": 0.1412905752658844,
+      "path": "truthfulness/vectors/honesty_l26.pt"
+    }
+  }
+}
