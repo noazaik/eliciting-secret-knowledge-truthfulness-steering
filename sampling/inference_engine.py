@@ -55,7 +55,7 @@ class InferenceEngine:
             if batch_size:
                 print(f"   • Batch size: {batch_size}")
             if noise_hook:
-                print(f"   • Fuzzing enabled (layer {noise_hook.layer_idx}, magnitude {noise_hook.noise_magnitude})")
+                print(f"   • Intervention: {noise_hook!r}")
 
         # Register intervention hooks if provided
         if noise_hook:

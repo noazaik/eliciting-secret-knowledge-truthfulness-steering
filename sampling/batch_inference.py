@@ -13,7 +13,12 @@ import numpy as np
 import torch
 from dotenv import load_dotenv
 from inference_engine import get_inference_engine
-from interventions import NoiseInjectionHook
+from interventions import (
+    NoiseInjectionHook,
+    SteeringHook,
+    compute_reference_norm,
+    load_steering_vector,
+)
 from prompt_preparers import get_prompt_preparer
 
 from utils import load_model_and_tokenizer
@@ -307,6 +312,31 @@ def create_parser():
     intervention_group.add_argument(
         "--fuzz_seed", type=int, default=42, help="Fuzzing seed"
     )
+    intervention_group.add_argument(
+        "--enable_steering", action="store_true", help="Add a steering vector to the residual stream"
+    )
+    intervention_group.add_argument(
+        "--steering_vector", help="Path to a saved 1-D steering vector (.pt)"
+    )
+    intervention_group.add_argument(
+        "--steer_random_seed", type=int, default=None,
+        help="Control: ignore --steering_vector and use a random unit direction with this seed",
+    )
+    intervention_group.add_argument(
+        "--steer_layer_idx", type=int, default=23, help="Layer to steer at"
+    )
+    intervention_group.add_argument(
+        "--steer_coeff", type=float, default=0.0,
+        help="Steering strength as a fraction of the layer's median residual norm (negative = anti-truthful)",
+    )
+    intervention_group.add_argument(
+        "--steer_positions", choices=["response", "all"], default="response",
+        help="Steer only response positions, or every position including the prompt",
+    )
+    intervention_group.add_argument(
+        "--steer_ref_norm", type=float, default=None,
+        help="Override the reference norm instead of estimating it from the prompts",
+    )
     # === OUTPUT ===
     output_group = parser.add_argument_group("Output")
     output_group.add_argument(
@@ -375,9 +405,60 @@ def validate_and_determine_strategy(args):
     return strategy
 
 
-def setup_interventions(args, model):
-    """Setup noise injection interventions."""
+def setup_interventions(args, model, tokenizer=None, formatted_prompts=None):
+    """Setup noise injection or steering interventions (at most one)."""
     noise_hook = None
+
+    if args.enable_fuzzing and args.enable_steering:
+        print("Error: --enable_fuzzing and --enable_steering cannot be combined")
+        sys.exit(1)
+
+    if args.enable_steering:
+        if args.steer_random_seed is None and not args.steering_vector:
+            print("Error: --enable_steering requires --steering_vector or --steer_random_seed")
+            sys.exit(1)
+        prompts_per_batch = (
+            args.batch_size // args.num_responses if args.batch_size else len(formatted_prompts)
+        )
+        # With one prompt per batch there is no padding, so padding side is irrelevant.
+        if (
+            args.steer_positions == "response"
+            and tokenizer.padding_side != "left"
+            and prompts_per_batch > 1
+        ):
+            print(
+                f"Error: tokenizer.padding_side is '{tokenizer.padding_side}'. "
+                "'response' steering needs left padding (so the last position is the "
+                "last real prompt token). Use --steer_positions all, or set left padding."
+            )
+            sys.exit(1)
+
+        vector = load_steering_vector(
+            path=args.steering_vector,
+            random_seed=args.steer_random_seed,
+            d_model=model.config.hidden_size,
+        )
+        if vector.shape[0] != model.config.hidden_size:
+            print(f"Error: vector dim {vector.shape[0]} != hidden size {model.config.hidden_size}")
+            sys.exit(1)
+
+        ref_norm = args.steer_ref_norm
+        if ref_norm is None:
+            ref_norm = compute_reference_norm(
+                model, tokenizer, formatted_prompts, args.steer_layer_idx
+            )
+        args.steer_ref_norm = ref_norm  # recorded in metadata
+        print(
+            f"Setting up steering (layer {args.steer_layer_idx}, coeff {args.steer_coeff}, "
+            f"ref_norm {ref_norm:.1f}, positions {args.steer_positions})"
+        )
+        return SteeringHook(
+            vector,
+            args.steer_layer_idx,
+            args.steer_coeff,
+            ref_norm,
+            positions=args.steer_positions,
+        )
 
     if args.enable_fuzzing:
         print(
@@ -495,7 +576,7 @@ def main():
 
     print("\nSTAGE 2: INFERENCE EXECUTION")
     print("-" * 30)
-    noise_hook = setup_interventions(args, model)
+    noise_hook = setup_interventions(args, model, tokenizer, prepared.formatted_prompts)
 
     eos_token_id = None
     if args.eos_token:
@@ -574,6 +655,17 @@ def main():
             "noise_magnitude": args.noise_magnitude,
             "layer_idx": args.fuzz_layer_idx,
             "seed": args.fuzz_seed,
+        }
+
+    if args.enable_steering:
+        metadata["steering_params"] = {
+            "enabled": True,
+            "steering_vector": args.steering_vector if args.steer_random_seed is None else None,
+            "random_control_seed": args.steer_random_seed,
+            "layer_idx": args.steer_layer_idx,
+            "coeff": args.steer_coeff,
+            "ref_norm": args.steer_ref_norm,
+            "positions": args.steer_positions,
         }
 
     if strategy == "standard" and args.ssc:
